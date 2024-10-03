@@ -17,12 +17,15 @@
 
 ### Menu principal
 
-![Captura de pantalla del juego](Imagenes/Principal.png)
+![Captura de pantalla del juego](Imagenes/M_Principal.png)
 
+### Controles
+
+![Captura de pantalla del juego](Imagenes/Controles.png)
 
 ### Menu de pausa
 
-![Captura de pantalla del juego](Imagenes/Pausa.png)
+![Captura de pantalla del juego](Imagenes/M_Pausa.png)
 
 ### Juego
 

@@ -16,6 +16,12 @@ pygame.display.set_caption("Adivina el Número")
 fuente = pygame.font.Font(None, 48)
 fuente_ganador = pygame.font.Font(None, 72)
 
+controles = {
+    "Jugar": pygame.K_RETURN,
+    "Salir": pygame.K_ESCAPE,
+    "Pausa": pygame.K_ESCAPE,
+}
+
 
 def dibujar_texto(texto, x, y, color=BLANCO, fuente=fuente):
     superficie = fuente.render(texto, True, color)
@@ -29,19 +35,24 @@ def dibujar_caja_entrada(x, y, texto):
     dibujar_texto(texto, x, y)
 
 
-def dibujar_fondo():
-    pantalla.fill(NEGRO)
-
-
 def menu_principal():
+    fuente = pygame.font.Font(None, 74)
+    fuente_pequeña = pygame.font.Font(None, 36)
     seleccion = 0
-    opciones = ["Jugar", "Salir"]
+    opciones = ["Jugar", "Controles", "Salir"]
     while True:
-        dibujar_fondo()
-        dibujar_texto("Adivina el Número", ANCHO // 2, ALTO // 4, AMARILLO)
+        pantalla.fill(NEGRO)
+        texto_titulo = fuente.render("Adivina el Número", True, BLANCO)
+        pantalla.blit(
+            texto_titulo, (ANCHO // 2 - texto_titulo.get_width() // 2, ALTO // 4)
+        )
         for i, opcion in enumerate(opciones):
             color = BLANCO if i == seleccion else (150, 150, 150)
-            dibujar_texto(opcion, ANCHO // 2, ALTO // 2 + i * 50, color)
+            texto_opcion = fuente_pequeña.render(opcion, True, color)
+            pantalla.blit(
+                texto_opcion,
+                (ANCHO // 2 - texto_opcion.get_width() // 2, ALTO // 2 + i * 50),
+            )
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 pygame.quit()
@@ -51,24 +62,92 @@ def menu_principal():
                     seleccion = (seleccion - 1) % len(opciones)
                 elif evento.key == pygame.K_DOWN:
                     seleccion = (seleccion + 1) % len(opciones)
-                elif evento.key == pygame.K_RETURN:
+                if evento.key == pygame.K_RETURN:
                     if seleccion == 0:
                         return True
                     elif seleccion == 1:
+                        menu_controles()
+                    elif seleccion == 2:
                         pygame.quit()
-                        return False
+                        return
+        pygame.display.flip()
+
+
+def menu_controles():
+    fuente = pygame.font.Font(None, 36)
+    fuente_Titulo = pygame.font.Font(None, 46)
+    fuente_instrucciones = pygame.font.Font(None, 26)
+    controles_orden = ["Jugar", "Salir", "Pausa"]
+    seleccion = 0
+    esperando_tecla = False
+    gris_claro = (200, 200, 200)
+    while True:
+        pantalla.fill(NEGRO)
+        texto_titulo = fuente_Titulo.render("Personalizar Controles", True, BLANCO)
+        pantalla.blit(
+            texto_titulo, (ANCHO // 2 - texto_titulo.get_width() // 2, ALTO // 6)
+        )
+        for i, control in enumerate(controles_orden):
+            color = AZUL if i == seleccion else BLANCO
+            texto = f"{control.capitalize()}: {pygame.key.name(controles[control])}"
+            if esperando_tecla and i == seleccion:
+                texto = f"{control}: Presiona una tecla..."
+            texto_renderizado = fuente.render(texto, True, color)
+            pantalla.blit(
+                texto_renderizado,
+                (ANCHO // 2 - texto_renderizado.get_width() // 2, ALTO // 3 + i * 50),
+            )
+        texto_instruccion = fuente_instrucciones.render(
+            "Presiona ENTER para personalizar", True, gris_claro
+        )
+        pantalla.blit(
+            texto_instruccion,
+            (ANCHO // 2 - texto_instruccion.get_width() // 2, ALTO - 100),
+        )
+        texto_volver = fuente_instrucciones.render(
+            "Presiona ESC para volver", True, gris_claro
+        )
+        pantalla.blit(
+            texto_volver, (ANCHO // 2 - texto_volver.get_width() // 2, ALTO - 60)
+        )
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                return
+            if evento.type == pygame.KEYDOWN:
+                if esperando_tecla:
+                    controles[controles_orden[seleccion]] = evento.key
+                    esperando_tecla = False
+                else:
+                    if evento.key == pygame.K_UP:
+                        seleccion = (seleccion - 1) % len(controles_orden)
+                    elif evento.key == pygame.K_DOWN:
+                        seleccion = (seleccion + 1) % len(controles_orden)
+                    elif evento.key == pygame.K_RETURN:
+                        esperando_tecla = True
+                    elif evento.key == pygame.K_ESCAPE:
+                        return
         pygame.display.flip()
 
 
 def menu_pausa():
+    fuente = pygame.font.Font(None, 74)
+    fuente_pequeña = pygame.font.Font(None, 36)
     seleccion = 0
     opciones = ["Reanudar", "Reiniciar", "Salir al menú principal"]
     while True:
-        dibujar_fondo()
-        dibujar_texto("Juego en Pausa", ANCHO // 2, ALTO // 4, AMARILLO)
+        pantalla.fill(NEGRO)
+        texto_pausa = fuente.render("Pausa", True, BLANCO)
+        pantalla.blit(
+            texto_pausa, (ANCHO // 2 - texto_pausa.get_width() // 2, ALTO // 4)
+        )
         for i, opcion in enumerate(opciones):
             color = BLANCO if i == seleccion else (150, 150, 150)
-            dibujar_texto(opcion, ANCHO // 2, ALTO // 2 + i * 50, color)
+            texto_opcion = fuente_pequeña.render(opcion, True, color)
+            pantalla.blit(
+                texto_opcion,
+                (ANCHO // 2 - texto_opcion.get_width() // 2, ALTO // 2 + i * 50),
+            )
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 pygame.quit()
@@ -98,16 +177,15 @@ def main():
     reloj = pygame.time.Clock()
     tiempo_inicial = pygame.time.get_ticks()
     juego_en_pausa = False
-
     while True:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 pygame.quit()
                 return
             elif evento.type == pygame.KEYDOWN:
-                if evento.key == pygame.K_ESCAPE:
+                if evento.key == controles["Pausa"]:
                     juego_en_pausa = True
-                if evento.key == pygame.K_RETURN and not adivinado:
+                if evento.key == controles["Jugar"] and not adivinado:
                     if entrada:
                         intento = int(entrada)
                         intentos += 1
@@ -133,7 +211,7 @@ def main():
             elif opcion == "reanudar":
                 juego_en_pausa = False
                 continue
-        dibujar_fondo()
+        pantalla.fill(NEGRO)
         dibujar_texto(mensaje, ANCHO // 2, 50, VERDE)
         dibujar_texto(f"Intentos: {intentos}", ANCHO // 2, 100, ROJO)
         if adivinado:
